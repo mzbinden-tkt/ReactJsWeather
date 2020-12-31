@@ -5,22 +5,20 @@ import AppFrame from './../components/AppFrame'
 import Paper from '@material-ui/core/Paper'
 import { getCities } from './../utils/serviceCities'
 
-const MainPage = ({ actions, data }) => {
+const MainPage = () => {
   const history = useHistory()
 
-  const onClickHandler = (city, countryCode) => {
-    history.push(`/city/${countryCode}/${city}`)
-  }
+  const onClickHandler = React.useCallback(
+    (city, countryCode) => {
+      history.push(`/city/${countryCode}/${city}`)
+    },
+    [history]
+  )
 
   return (
     <AppFrame>
       <Paper elevation={3}>
-        <CityList
-          cities={getCities()}
-          onClickCity={onClickHandler}
-          actions={actions}
-          data={data}
-        />
+        <CityList cities={getCities()} onClickCity={onClickHandler} />
       </Paper>
     </AppFrame>
   )

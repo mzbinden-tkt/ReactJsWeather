@@ -4,7 +4,7 @@ import { getWeatherUrl } from './../utils/urls'
 import getAllWeather from './../utils/transform/getAllWeather'
 import { getCityCode } from './../utils/utils'
 
-const useCityList = (cities, onSetAllWeather, allWeather) => {
+const useCityList = (cities, actions, allWeather) => {
   // const [allWeather, setAllWeather] = useState([])
   const [error, setError] = useState(null)
 
@@ -12,11 +12,17 @@ const useCityList = (cities, onSetAllWeather, allWeather) => {
     const setWeather = async (city, countryCode) => {
       const url = getWeatherUrl({ city, countryCode })
       try {
-        onSetAllWeather({ [getCityCode(city, countryCode)]: {} })
+        // onSetAllWeather({ [getCityCode(city, countryCode)]: {} })
+        const propName = [getCityCode(city, countryCode)]
+        actions({
+          type: 'SET_ALL_WEATHER',
+          payload: { [propName]: {} },
+        })
         const { data } = await axios.get(url)
         const AllWeatherAux = getAllWeather(data, city, countryCode)
         // setAllWeather((allWeather) => ({ ...allWeather, ...AllWeatherAux }))
-        onSetAllWeather(AllWeatherAux)
+        // onSetAllWeather(AllWeatherAux)
+        actions({ type: 'SET_ALL_WEATHER', payload: AllWeatherAux })
       } catch (error) {
         if (error.response) {
           setError('Hay un error en el servidor')
@@ -33,7 +39,7 @@ const useCityList = (cities, onSetAllWeather, allWeather) => {
         setWeather(city, countryCode)
       }
     })
-  }, [cities, onSetAllWeather, allWeather])
+  }, [cities, allWeather])
   return { error, setError }
 }
 

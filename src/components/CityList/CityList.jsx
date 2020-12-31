@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import PropTypes from 'prop-types'
 import Alert from '@material-ui/lab/Alert'
 import { List, ListItem, Grid } from '@material-ui/core'
@@ -6,34 +6,50 @@ import CityInfo from './../CityInfo'
 import Weather from './../Weather'
 import useCityList from './../../hooks/useCityList'
 import { getCityCode } from './../../utils/utils'
+import {
+  useWeatherDispatchContext,
+  useWeatherStateContext,
+} from '../../WeatherContext'
+
+const CityListItem = React.memo(
+  ({ city, country, countryCode, eventOnClickCity, weather }) => {
+    return (
+      <ListItem onClick={() => eventOnClickCity(city, countryCode)} button>
+        <Grid container justify="center" alignItems="center">
+          <Grid item md={9} xs={12}>
+            <CityInfo city={city} country={country} />
+          </Grid>
+          <Grid item md={3} xs={12}>
+            <Weather
+              temperature={weather && weather.temperature}
+              state={weather && weather.state}
+            />
+          </Grid>
+        </Grid>
+      </ListItem>
+    )
+  }
+)
+
+CityListItem.displayName = 'CityListItem'
 
 const renderCityAndCountry = (eventOnClickCity) => (cityAndCountry, weather) => {
-  const { city, country, countryCode } = cityAndCountry
+  const { city, countryCode } = cityAndCountry
   return (
-    <ListItem
+    <CityListItem
       key={getCityCode(city, countryCode)}
-      onClick={() => eventOnClickCity(city, countryCode)}
-      button
-    >
-      <Grid container justify="center" alignItems="center">
-        <Grid item md={9} xs={12}>
-          <CityInfo city={city} country={country} />
-        </Grid>
-        <Grid item md={3} xs={12}>
-          <Weather
-            temperature={weather && weather.temperature}
-            state={weather && weather.state}
-          />
-        </Grid>
-      </Grid>
-    </ListItem>
+      eventOnClickCity={eventOnClickCity}
+      weather={weather}
+      {...cityAndCountry}
+    />
   )
 }
 
-const CityList = ({ cities, onClickCity, actions, data }) => {
-  const { onSetAllWeather } = actions
+const CityList = ({ cities, onClickCity }) => {
+  const actions = useWeatherDispatchContext()
+  const data = useWeatherStateContext()
   const { allWeather } = data
-  const { error, setError } = useCityList(cities, onSetAllWeather, allWeather)
+  const { error, setError } = useCityList(cities, actions, allWeather)
 
   return (
     <div>
@@ -65,4 +81,4 @@ CityList.propTypes = {
   onClickCity: PropTypes.func.isRequired,
 }
 
-export default CityList
+export default React.memo(CityList)
